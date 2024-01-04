@@ -45,11 +45,13 @@ func buildJob(c *gin.Context) {
 }
 
 func main() {
-  r := gin.Default()
-  r.GET("/ping", pong)
-  r.GET("/job/:jobName/api/json", jobInfo)
-  r.GET("job/:jobName/:buildNumber/api/json", buildInfo)
-  r.GET("queue/item/:queueNumber/api/json", queueItem)
-  r.POST("job/:jobName/buildWithParameters", buildJob)
-  r.Run() // listen and serve on 0.0.0.0:8080 (for windows "localhost:8080")
+	dbInitialization()
+	getAllDbItems()
+	r := gin.Default()
+	r.GET("/ping", pong)
+	r.GET("/job/:jobName/api/json", jobInfo)
+	r.GET("job/:jobName/:buildNumber/api/json", buildInfo)
+	r.GET("queue/item/:queueNumber/api/json", queueItem)
+	r.POST("job/:jobName/buildWithParameters", buildJob)
+	r.Run()
 }

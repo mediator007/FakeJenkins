@@ -8,21 +8,24 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
-func connector() {
-	// Open the database, creating it if it doesn't exist
-	db, err := sql.Open("sqlite3", "db.sqlite3")
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer db.Close()
+const dbName = "db.sqlite3"
 
-	// Ping the database to check the connection
-	err = db.Ping()
+// GetDBConnection returns a connection to the SQLite database.
+func _GetDBConnection() (*sql.DB, error) {
+	db, err := sql.Open("sqlite3", dbName)
 	if err != nil {
-		log.Fatal(err)
+		return nil, fmt.Errorf("failed to open database: %v", err)
 	}
+	// Check if the database connection is alive
+	if err := db.Ping(); err != nil {
+		db.Close()
+		return nil, fmt.Errorf("failed to ping database: %v", err)
+	}
+	return db, nil
+}
 
-	fmt.Println("Connected to SQLite database")
+func dbInitialization() {
+	db, err := _GetDBConnection()
 
 	// Create a table (if it doesn't exist)
 	createTableQuery := `
@@ -37,14 +40,10 @@ func connector() {
 		log.Fatal(err)
 	}
 	fmt.Println("Table 'users' created successfully")
+}
 
-	// Insert data into the table
-	insertDataQuery := "INSERT INTO users (name, age) VALUES (?, ?);"
-	_, err = db.Exec(insertDataQuery, "John Doe", 30)
-	if err != nil {
-		log.Fatal(err)
-	}
-	fmt.Println("Data inserted successfully")
+func getAllDbItems() {
+	db, err := _GetDBConnection()
 
 	// Query data from the table
 	rows, err := db.Query("SELECT id, name, age FROM users;")
@@ -68,4 +67,16 @@ func connector() {
 	if err := rows.Err(); err != nil {
 		log.Fatal(err)
 	}
+}
+
+func insertBuild() {
+	db, err := _GetDBConnection()
+	
+	// Insert data into the table
+	insertDataQuery := "INSERT INTO users (name, age) VALUES (?, ?);"
+	_, err = db.Exec(insertDataQuery, "John Doe", 30)
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Println("Data inserted successfully")
 }
