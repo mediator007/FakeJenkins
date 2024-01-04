@@ -4,7 +4,6 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
-	"time"
 	_ "github.com/mattn/go-sqlite3"
 )
 
@@ -40,33 +39,6 @@ func dbInitialization() {
 		log.Fatal(err)
 	}
 	fmt.Println("Table 'users' created successfully")
-}
-
-func getAllDbItems() {
-	db, err := _GetDBConnection()
-
-	// Query data from the table
-	rows, err := db.Query("SELECT id, creationTime, executionTime FROM builds;")
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer rows.Close()
-
-	fmt.Println("Query results:")
-	for rows.Next() {
-		var id, executionTime int
-		var creationTime time.Time
-		err := rows.Scan(&id, &creationTime, &executionTime)
-		if err != nil {
-			log.Fatal(err)
-		}
-		fmt.Printf("ID: %d, creationTime: %s, executionTime: %d\n", id, creationTime, executionTime)
-	}
-
-	// Handle errors from iterating over rows (if any)
-	if err := rows.Err(); err != nil {
-		log.Fatal(err)
-	}
 }
 
 func insertBuild(execTime int) (int64, error){
