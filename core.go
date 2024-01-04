@@ -21,3 +21,15 @@ func buildJob(executionTime string) (string, error){
 	q := strconv.FormatInt(queueNumber, 10)
 	return q, nil
 }
+
+func buildInfo(buildNumber string) map[string]interface{} {
+
+
+	// Create a map with the key "artifacts."
+	response := make(map[string]interface{})
+
+	response["artifacts"] = []string{"artifact 1", "artifact 2"}
+	response["queuId"] = "BUILD NUMBER - " + buildNumber
+
+	return response
+}

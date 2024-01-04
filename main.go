@@ -18,12 +18,12 @@ func jobInfo(c *gin.Context) {
     c.String(http.StatusOK, response)
 }
 
-func buildInfo(c *gin.Context) {
-	jobName := c.Param("jobName")
+func buildInfoHandler(c *gin.Context) {
+	// curl localhost:8080/job/ANY_JOB_NAME/<BUILD-NUMBER>/api/json
+	// jobName := c.Param("jobName")
 	buildNumber := c.Param("buildNumber")
-	// TODO
-	response := "Job " + jobName + "--Data for buildNumber " + buildNumber
-    c.String(http.StatusOK, response)
+	response := buildInfo(buildNumber)
+    c.JSON(http.StatusOK, response)
 }
 
 func queueItem(c *gin.Context) {
@@ -52,7 +52,7 @@ func main() {
 	r := gin.Default()
 	r.GET("/ping", pong)
 	r.GET("/job/:jobName/api/json", jobInfo)
-	r.GET("job/:jobName/:buildNumber/api/json", buildInfo)
+	r.GET("job/:jobName/:buildNumber/api/json", buildInfoHandler)
 	r.GET("queue/item/:queueNumber/api/json", queueItem)
 	r.POST("job/:jobName/buildWithParameters", buildJobHandler)
 	r.Run()
