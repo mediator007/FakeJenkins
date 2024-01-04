@@ -4,7 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
-
+	"time"
 	_ "github.com/mattn/go-sqlite3"
 )
 
@@ -29,10 +29,10 @@ func dbInitialization() {
 
 	// Create a table (if it doesn't exist)
 	createTableQuery := `
-		CREATE TABLE IF NOT EXISTS users (
+		CREATE TABLE IF NOT EXISTS builds (
 			id INTEGER PRIMARY KEY AUTOINCREMENT,
-			name TEXT NOT NULL,
-			age INTEGER
+			creationTime DATETIME DEFAULT CURRENT_TIMESTAMP,
+			executionTime INTEGER
 		);
 	`
 	_, err = db.Exec(createTableQuery)
@@ -46,7 +46,7 @@ func getAllDbItems() {
 	db, err := _GetDBConnection()
 
 	// Query data from the table
-	rows, err := db.Query("SELECT id, name, age FROM users;")
+	rows, err := db.Query("SELECT id, creationTime, executionTime FROM builds;")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -54,13 +54,13 @@ func getAllDbItems() {
 
 	fmt.Println("Query results:")
 	for rows.Next() {
-		var id, age int
-		var name string
-		err := rows.Scan(&id, &name, &age)
+		var id, executionTime int
+		var creationTime time.Time
+		err := rows.Scan(&id, &creationTime, &executionTime)
 		if err != nil {
 			log.Fatal(err)
 		}
-		fmt.Printf("ID: %d, Name: %s, Age: %d\n", id, name, age)
+		fmt.Printf("ID: %d, creationTime: %s, executionTime: %d\n", id, creationTime, executionTime)
 	}
 
 	// Handle errors from iterating over rows (if any)
@@ -69,14 +69,19 @@ func getAllDbItems() {
 	}
 }
 
-func insertBuild() {
+func insertBuild(execTime int) (int64, error){
 	db, err := _GetDBConnection()
-	
 	// Insert data into the table
-	insertDataQuery := "INSERT INTO users (name, age) VALUES (?, ?);"
-	_, err = db.Exec(insertDataQuery, "John Doe", 30)
+	insertDataQuery := "INSERT INTO builds (executionTime) VALUES (?);"
+	result, err := db.Exec(insertDataQuery, execTime)
 	if err != nil {
 		log.Fatal(err)
+		return 0, err
 	}
-	fmt.Println("Data inserted successfully")
+	lastInsertID, err := result.LastInsertId()
+	if err != nil {
+		return 0, err
+	}
+	fmt.Println("Build inserted successfully with id - ", lastInsertID)
+	return lastInsertID, nil
 }

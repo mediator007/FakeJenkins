@@ -2,7 +2,6 @@ package main
 
 import (
   "net/http"
-
   "github.com/gin-gonic/gin"
 )
 
@@ -34,24 +33,27 @@ func queueItem(c *gin.Context) {
 	c.String(http.StatusOK, response)
 }
 
-func buildJob(c *gin.Context) {
-	jobName := c.Param("jobName")
-	// shortcut for c.Request.URL.Query().Get("lastname")
-	// url?commit=123
-	commit := c.Query("commit")
-	response := "Job name " + jobName + "-- Commit " + commit
-	//TODO
-	c.String(http.StatusAccepted, response)
+func buildJobHandler(c *gin.Context) {
+	// curl -X POST -i localhost:8080/job/ANY_JOB_NAME/buildWithParameters?executionTime=55
+	executionTime := c.Query("executionTime")
+	response, err := buildJob(executionTime)
+	if err != nil {
+		response =  "Cant build Job with execTime " + executionTime
+		c.JSON(http.StatusBadRequest, response)
+	} else {
+		header := "some/strange/url/" + response + "/"
+		c.Header("Location", header)
+		c.JSON(http.StatusAccepted, response)
+	}
 }
 
 func main() {
 	dbInitialization()
-	getAllDbItems()
 	r := gin.Default()
 	r.GET("/ping", pong)
 	r.GET("/job/:jobName/api/json", jobInfo)
 	r.GET("job/:jobName/:buildNumber/api/json", buildInfo)
 	r.GET("queue/item/:queueNumber/api/json", queueItem)
-	r.POST("job/:jobName/buildWithParameters", buildJob)
+	r.POST("job/:jobName/buildWithParameters", buildJobHandler)
 	r.Run()
 }
