@@ -1,41 +1,55 @@
 package main
 
 import (
-	"fmt"
-	"net/http"
-	"strings"
+  "net/http"
+
+  "github.com/gin-gonic/gin"
 )
 
-func main() {
-	http.HandleFunc("/api/", func(w http.ResponseWriter, r *http.Request) {
-		// Extract id from the URL path
-		id := extractID(r.URL.Path)
-
-		// Check if id is empty
-		if id == "" {
-			http.Error(w, "Invalid URL pattern. Missing ID.", http.StatusBadRequest)
-			return
-		}
-
-		// Respond with the extracted ID in JSON format
-		response := fmt.Sprintf(`{"id": "%s"}`, id)
-		w.Header().Set("Content-Type", "application/json")
-		w.Write([]byte(response))
-	})
-
-	// Start the server on port 8080
-	fmt.Println("Server is running on :8080")
-	http.ListenAndServe(":8080", nil)
+func pong(c *gin.Context) {
+	c.JSON(http.StatusOK, gin.H{
+		"message": "pong",
+	  })
 }
 
-func extractID(path string) string {
-	// Split the path using "/"
-	parts := strings.Split(path, "/")
+func jobInfo(c *gin.Context) {
+	jobName := c.Param("jobName")
+	// TODO 
+	response := "Data for Job " + jobName 
+    c.String(http.StatusOK, response)
+}
 
-	// Check if there are enough parts and the second part is "api"
-	if len(parts) >= 3 && parts[1] == "api" {
-		return parts[2] // The third part is the ID
-	}
+func buildInfo(c *gin.Context) {
+	jobName := c.Param("jobName")
+	buildNumber := c.Param("buildNumber")
+	// TODO
+	response := "Job " + jobName + "--Data for buildNumber " + buildNumber
+    c.String(http.StatusOK, response)
+}
 
-	return ""
+func queueItem(c *gin.Context) {
+	queueNumber := c.Param("queueNumber")
+	//TODO
+	response := "Queue number " + queueNumber
+	c.String(http.StatusOK, response)
+}
+
+func buildJob(c *gin.Context) {
+	jobName := c.Param("jobName")
+	// shortcut for c.Request.URL.Query().Get("lastname")
+	// url?commit=123
+	commit := c.Query("commit")
+	response := "Job name " + jobName + "-- Commit " + commit
+	//TODO
+	c.String(http.StatusAccepted, response)
+}
+
+func main() {
+  r := gin.Default()
+  r.GET("/ping", pong)
+  r.GET("/job/:jobName/api/json", jobInfo)
+  r.GET("job/:jobName/:buildNumber/api/json", buildInfo)
+  r.GET("queue/item/:queueNumber/api/json", queueItem)
+  r.POST("job/:jobName/buildWithParameters", buildJob)
+  r.Run() // listen and serve on 0.0.0.0:8080 (for windows "localhost:8080")
 }
