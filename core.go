@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"strconv"
+	"time"
 )
 
 func buildJob(executionTime string) (string, error){
@@ -22,14 +23,31 @@ func buildJob(executionTime string) (string, error){
 	return q, nil
 }
 
-func buildInfo(buildNumber string) map[string]interface{} {
+func buildInfo(buildNumber string) (map[string]interface{}, error) {
 
-
-	// Create a map with the key "artifacts."
 	response := make(map[string]interface{})
+	build, err := getBuildByBuildNumber(buildNumber)
+	if err != nil {
+		return response, err
+	}
+
+	if build.BuildStatus == "INQUEUE" {
+		_, err = updateBuildStatus(buildNumber, "INPROGRESS")
+	}
+
+	if build.BuildStatus == "INPROGRESS" {
+		// Calculate the expected completion time
+		expectedCompletionTime := build.StartTime.Add(time.Duration(build.ExecutionTime) * time.Second)
+		// Compare with the current time
+		currentTime := time.Now()
+		if currentTime.After(expectedCompletionTime) {
+			_, err = updateBuildStatus(buildNumber, "SUCCESSFUL")
+		}
+	}
 
 	response["artifacts"] = []string{"artifact 1", "artifact 2"}
-	response["queuId"] = "BUILD NUMBER - " + buildNumber
+	response["queuId"] = build.ID
+	response["status"] = build.BuildStatus
 
-	return response
+	return response, nil
 }

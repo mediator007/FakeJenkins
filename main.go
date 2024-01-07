@@ -22,8 +22,13 @@ func buildInfoHandler(c *gin.Context) {
 	// curl localhost:8080/job/ANY_JOB_NAME/<BUILD-NUMBER>/api/json
 	// jobName := c.Param("jobName")
 	buildNumber := c.Param("buildNumber")
-	response := buildInfo(buildNumber)
-    c.JSON(http.StatusOK, response)
+	response, err := buildInfo(buildNumber)
+	if err != nil {
+		badResponse :=  "Cant get build info with buildNumber: " + buildNumber
+		c.JSON(http.StatusBadRequest, badResponse)
+	} else {
+		c.JSON(http.StatusOK, response)
+	}
 }
 
 func queueItem(c *gin.Context) {
