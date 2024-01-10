@@ -13,12 +13,21 @@ func pong(c *gin.Context) {
 }
 
 func buids(c *gin.Context) {
-	builds, err := getAllBuilds()
+	builds, err := allBuilds()
 	if err != nil {
 		badResponse := "Cant get all builds"
 		c.JSON(http.StatusBadRequest, badResponse)
 	} else {
 		c.JSON(http.StatusOK, builds)
+	}
+}
+
+func deleteAllBuildsHandler(c *gin.Context) {
+	err := deleteAll()
+	if err != nil {
+		c.JSON(http.StatusBadRequest, "Delete all error")
+	} else {
+		c.JSON(http.StatusOK, "Successful delete all")
 	}
 }
 
@@ -66,8 +75,13 @@ func buildJobHandler(c *gin.Context) {
 func main() {
 	dbInitialization()
 	r := gin.Default()
+	r.LoadHTMLGlob("templates/*")
+	r.GET("/", func(c *gin.Context) {
+		c.HTML(http.StatusOK, "index.html", nil)
+	})
 	r.GET("/ping", pong)
 	r.GET("/builds", buids)
+	r.DELETE("/deleteAllBuilds", deleteAllBuildsHandler)
 	r.GET("/job/:jobName/api/json", jobInfo)
 	r.GET("job/:jobName/:buildNumber/api/json", buildInfoHandler)
 	r.GET("queue/item/:queueNumber/api/json", queueItem)

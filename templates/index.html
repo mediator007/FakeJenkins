@@ -6,8 +6,9 @@
     <title>Builds Table</title>
 </head>
 <body>
-
-<h1>Builds Table</h1>
+<h1>Fake Jenkins</h1>
+<img src="https://docs.knapsackpro.com/images/blog/posts/jenkins-pipeline-how-to-run-parallel-tests-in-your-workflow-stages/jenkins.jpg" style="width: 10%; height: 10%;">
+<h2>Builds</h2>
 <table border="1">
     <thead>
         <tr>
@@ -34,12 +35,28 @@
                 row.innerHTML = `<td>${entry.ID}</td>
                                  <td>${entry.ExecutionTime}</td>
                                  <td>${new Date(entry.StartTime).toLocaleString()}</td>
-                                 <td>${entry.BuildStatus}</td>
+                                 <td>${entry.BuildStatus} ${getEmojiByStatus(entry.BuildStatus)}</td>
                                  <td>${entry.JobName}</td>`;
                 tableBody.appendChild(row);
             });
         })
         .catch(error => console.error('Error fetching data:', error));
+
+    // Function to get emoji based on buildStatus
+    function getEmojiByStatus(buildStatus) {
+        switch (buildStatus) {
+            case 'INQUEUE':
+                return '🟡'; // Yellow circle emoji for INQUEUE
+            case 'INPROGRESS':
+                return '🔵'; // Blue circle emoji for INRUNNING
+            case 'ABORTED':
+                return '🔴'; // Red circle emoji for ABORTED
+            case 'SUCCESSFUL':
+                return '🟢'; // Green circle emoji for SUCCESSFUL
+            default:
+                return ''; // Default emoji
+        }
+    }
 </script>
 
 </body>

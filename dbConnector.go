@@ -9,7 +9,7 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
-const dbName = "db.sqlite3"
+const dbName = "./db.sqlite3"
 
 type Build struct {
 	ID            int64
@@ -62,6 +62,12 @@ func getAllBuilds() ([]Build, error) {
 func dbInitialization() {
 	db, err := _GetDBConnection()
 
+	if err != nil {
+		log.Fatal("Error initializing database connection:", err)
+		return
+	}
+	defer db.Close()
+
 	// Create a table (if it doesn't exist)
 	createTableQuery := `
 		CREATE TABLE IF NOT EXISTS builds (
@@ -89,6 +95,7 @@ func dbInitialization() {
 	if err != nil {
 		log.Fatal(err)
 	}
+	defer db.Close()
 	fmt.Println("Table 'users' created successfully")
 }
 
@@ -147,4 +154,15 @@ func getBuildByBuildNumber(buildNumber string) (Build, error) {
 	}
 
 	return build, nil
+}
+
+func deleteAll() error {
+	db, _ := _GetDBConnection()
+	_, err := db.Exec("DELETE FROM builds")
+	if err != nil {
+		return fmt.Errorf("failed to delete all builds: %v", err)
+	}
+
+	fmt.Println("All builds deleted successfully")
+	return nil
 }
