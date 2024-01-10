@@ -76,3 +76,26 @@ func buildInfo(buildNumber string) (map[string]interface{}, error) {
 
 	return response, nil
 }
+
+func queueItem(queueNumber string) (map[string]interface{}, error) {
+	response := make(map[string]interface{})
+	build, err := getBuildByBuildNumber(queueNumber)
+	if err != nil {
+		return response, err
+	}
+	executable := make(map[string]interface{})
+	executable["number"] = build.ID
+	response["executable"] = executable
+	return response, nil
+}
+
+func jobInfo(jobName string) (map[string]interface{}, error) {
+	response := make(map[string]interface{})
+	inQueue, err := getAllInQueueBuilds()
+	if err != nil {
+		return response, err
+	}
+	response["buildable"] = true
+	response["inQueue"] = inQueue
+	return response, nil
+}

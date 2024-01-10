@@ -156,6 +156,32 @@ func getBuildByBuildNumber(buildNumber string) (Build, error) {
 	return build, nil
 }
 
+func getAllInQueueBuilds() ([]Build, error) {
+	db, _ := _GetDBConnection()
+	rows, err := db.Query("SELECT * FROM builds WHERE buildStatus = 'INQUEUE'")
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var builds []Build
+
+	for rows.Next() {
+		var build Build
+		err := rows.Scan(&build.ID, &build.ExecutionTime, &build.StartTime, &build.BuildStatus, &build.JobName)
+		if err != nil {
+			return nil, err
+		}
+		builds = append(builds, build)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return builds, nil
+}
+
 func deleteAll() error {
 	db, _ := _GetDBConnection()
 	_, err := db.Exec("DELETE FROM builds")

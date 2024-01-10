@@ -19,9 +19,21 @@ Example:
 First request after build creatio return INQUEUE status. Second - launch build &  
 change status to INPROGRESS. Build became SUCCESSFUL if startTime + execTime >= currentTime  
 
+#### Get job info:
+```GET /job/DEFAULT/api/json```  
+Example:  
+```curl localhost:8080/job/DEFAULT/api/json``` ->   
+```{"buildable":true,"inQueue":[{"ID":9,"ExecutionTime":10,"StartTime":"2024-01-10T13:55:25Z","BuildStatus":"INQUEUE","JobName":"DEFAULT"}]}```  
+
+#### Get queue item:
+```GET /queue/item/<queueNumber>/api/json```  
+Example:  
+```curl localhost:8080/queue/item/6/api/json``` ->   
+```{"executable": {"number": 6}}```  
+
 #### Delete all builds:  
 ```DELETE /deleteAllBuilds```  
-Example: 
+Example:   
 ```curl -X DELETE -i localhost:8080/deleteAllBuilds``` ->  
 ```"Successful delete all"```
 

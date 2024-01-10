@@ -31,11 +31,16 @@ func deleteAllBuildsHandler(c *gin.Context) {
 	}
 }
 
-func jobInfo(c *gin.Context) {
+func jobInfoHandler(c *gin.Context) {
+	//curl localhost:8080/job/DEFAULT/api/json
 	jobName := c.Param("jobName")
-	// TODO
-	response := "Data for Job " + jobName
-	c.String(http.StatusOK, response)
+	response, err := jobInfo(jobName)
+	if err != nil {
+		badResponse := "Cant get job info with jobNAme: " + jobName
+		c.JSON(http.StatusBadRequest, badResponse)
+	} else {
+		c.JSON(http.StatusOK, response)
+	}
 }
 
 func buildInfoHandler(c *gin.Context) {
@@ -51,11 +56,16 @@ func buildInfoHandler(c *gin.Context) {
 	}
 }
 
-func queueItem(c *gin.Context) {
+func queueItemHandler(c *gin.Context) {
+	// curl localhost:8080/queue/item/<queueNumber>/api/json
 	queueNumber := c.Param("queueNumber")
-	//TODO
-	response := "Queue number " + queueNumber
-	c.String(http.StatusOK, response)
+	response, err := queueItem(queueNumber)
+	if err != nil {
+		badResponse := "Cant get queue item with queueNumber: " + queueNumber
+		c.JSON(http.StatusBadRequest, badResponse)
+	} else {
+		c.JSON(http.StatusOK, response)
+	}
 }
 
 func buildJobHandler(c *gin.Context) {
@@ -72,19 +82,21 @@ func buildJobHandler(c *gin.Context) {
 	}
 }
 
+func returnStatic(c *gin.Context) {
+	c.HTML(http.StatusOK, "index.html", nil)
+}
+
 func main() {
 	dbInitialization()
 	r := gin.Default()
 	r.LoadHTMLGlob("templates/*")
-	r.GET("/", func(c *gin.Context) {
-		c.HTML(http.StatusOK, "index.html", nil)
-	})
+	r.GET("/", returnStatic)
 	r.GET("/ping", pong)
 	r.GET("/builds", buids)
 	r.DELETE("/deleteAllBuilds", deleteAllBuildsHandler)
-	r.GET("/job/:jobName/api/json", jobInfo)
+	r.GET("/job/:jobName/api/json", jobInfoHandler)
 	r.GET("job/:jobName/:buildNumber/api/json", buildInfoHandler)
-	r.GET("queue/item/:queueNumber/api/json", queueItem)
+	r.GET("queue/item/:queueNumber/api/json", queueItemHandler)
 	r.POST("job/:jobName/buildWithParameters", buildJobHandler)
 	r.Run()
 }
