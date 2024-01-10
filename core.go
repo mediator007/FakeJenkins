@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-func buildJob(executionTime string) (string, error){
+func buildJob(executionTime string) (string, error) {
 	i, err := strconv.Atoi(executionTime)
 	if err != nil {
 		// Handle the error if the conversion fails

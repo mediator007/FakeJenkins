@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"time"
+
 	_ "github.com/mattn/go-sqlite3"
 )
 
@@ -30,6 +31,32 @@ func _GetDBConnection() (*sql.DB, error) {
 		return nil, fmt.Errorf("failed to ping database: %v", err)
 	}
 	return db, nil
+}
+
+func getAllBuilds() ([]Build, error) {
+	db, _ := _GetDBConnection()
+	rows, err := db.Query("SELECT * FROM builds")
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var builds []Build
+
+	for rows.Next() {
+		var build Build
+		err := rows.Scan(&build.ID, &build.ExecutionTime, &build.StartTime, &build.BuildStatus, &build.JobName)
+		if err != nil {
+			return nil, err
+		}
+		builds = append(builds, build)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return builds, nil
 }
 
 func dbInitialization() {
@@ -65,7 +92,7 @@ func dbInitialization() {
 	fmt.Println("Table 'users' created successfully")
 }
 
-func insertBuild(execTime int) (int64, error){
+func insertBuild(execTime int) (int64, error) {
 	db, err := _GetDBConnection()
 	// Insert data into the table
 	insertDataQuery := "INSERT INTO builds (executionTime) VALUES (?);"
@@ -81,7 +108,7 @@ func insertBuild(execTime int) (int64, error){
 	return lastInsertID, nil
 }
 
-func updateBuildStatus(buildNumber string, status string) (int64, error){
+func updateBuildStatus(buildNumber string, status string) (int64, error) {
 	db, err := _GetDBConnection()
 	// Insert data into the table
 	updateDataQuery := "UPDATE builds SET buildStatus = ? WHERE id = ?"
@@ -118,6 +145,6 @@ func getBuildByBuildNumber(buildNumber string) (Build, error) {
 		}
 		return Build{}, err
 	}
-	
+
 	return build, nil
 }

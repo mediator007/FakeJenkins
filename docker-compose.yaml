@@ -1,9 +1,20 @@
 version: '3'
 
 services:
-  go-server:
+  nginx-proxy:
+    image: nginx:latest
+    container_name: nginx-proxy
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx-conf:/etc/nginx/conf.d
+    depends_on:
+      - go-server
+  
+  golang-server:
     build:
       context: .
       dockerfile: Dockerfile
+    container_name: golang-server
     ports:
       - "8080:8080"

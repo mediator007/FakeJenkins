@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Builds Table</title>
+</head>
+<body>
+
+<h1>Builds Table</h1>
+<table border="1">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Execution Time</th>
+            <th>Start Time</th>
+            <th>Build Status</th>
+            <th>Job Name</th>
+        </tr>
+    </thead>
+    <tbody id="builds-table-body">
+        <!-- Data will be inserted here dynamically -->
+    </tbody>
+</table>
+
+<script>
+    // Fetch data from localhost:8080/builds and populate the table
+    fetch('http://localhost:8080/builds')
+        .then(response => response.json())
+        .then(data => {
+            const tableBody = document.getElementById('builds-table-body');
+            data.forEach(entry => {
+                const row = document.createElement('tr');
+                row.innerHTML = `<td>${entry.ID}</td>
+                                 <td>${entry.ExecutionTime}</td>
+                                 <td>${new Date(entry.StartTime).toLocaleString()}</td>
+                                 <td>${entry.BuildStatus}</td>
+                                 <td>${entry.JobName}</td>`;
+                tableBody.appendChild(row);
+            });
+        })
+        .catch(error => console.error('Error fetching data:', error));
+</script>
+
+</body>
+</html>
