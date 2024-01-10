@@ -1,5 +1,7 @@
 # FakeJenkins
 
+![Screenshot](screenshot.png)
+
 ### Dev Launch
 
 ```go run .```  
