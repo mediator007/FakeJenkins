@@ -6,7 +6,13 @@ import (
 	"time"
 )
 
-const DefaultJobExecutionTime = "20"
+type Artifact struct {
+	FileName     string `json:"fileName"`
+	DisplayPath  string `json:"displayPath"`
+	RelativePath string `json:"relativePath"`
+}
+
+const DefaultJobExecutionTime = "5"
 
 func allBuilds() ([]Build, error) {
 	builds, err := getAllBuilds()
@@ -33,7 +39,7 @@ func allBuilds() ([]Build, error) {
 	return builds, nil
 }
 
-func buildJob(executionTime string) (string, error) {
+func buildJob(JobName string, executionTime string) (string, error) {
 
 	if executionTime == "" {
 		executionTime = DefaultJobExecutionTime
@@ -45,7 +51,7 @@ func buildJob(executionTime string) (string, error) {
 		fmt.Println("Conversion error:", err)
 		return "", err
 	}
-	queueNumber, err := insertBuild(i)
+	queueNumber, err := insertBuild(JobName, i)
 	if err != nil {
 		// Handle the error if the conversion fails
 		fmt.Println("Insertion error:", err)
@@ -77,11 +83,18 @@ func buildInfo(buildNumber string) (map[string]interface{}, error) {
 		}
 	}
 
-	response["artifacts"] = []string{"artifact 1", "artifact 2"}
+	artifact := Artifact{
+		DisplayPath:  build.JobName + "_artifacts.json",
+		FileName:     build.JobName + "_artifacts.json",
+		RelativePath: build.JobName + "_artifacts.json",
+	}
+
+	response["artifacts"] = []Artifact{artifact}
 	response["queuId"] = build.ID
-	// FIXME
-	response["timestamp"] = time.Now().Unix() //ms from start
+	response["timestamp"] = time.Now().UnixMilli() - (build.StartTime.UnixMilli() / int64(time.Millisecond))
 	response["result"] = build.BuildStatus
+	// FIXME auto insertion
+	response["url"] = "http://10.199.30.215:8080/job/folder/job/" + build.JobName + "/" + buildNumber
 
 	return response, nil
 }

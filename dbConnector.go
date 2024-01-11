@@ -13,10 +13,10 @@ const dbName = "./db.sqlite3"
 
 type Build struct {
 	ID            int64
+	JobName       string
 	ExecutionTime int64
 	StartTime     time.Time
 	BuildStatus   string
-	JobName       string
 }
 
 // GetDBConnection returns a connection to the SQLite database.
@@ -45,7 +45,7 @@ func getAllBuilds() ([]Build, error) {
 
 	for rows.Next() {
 		var build Build
-		err := rows.Scan(&build.ID, &build.ExecutionTime, &build.StartTime, &build.BuildStatus, &build.JobName)
+		err := rows.Scan(&build.ID, &build.JobName, &build.ExecutionTime, &build.StartTime, &build.BuildStatus)
 		if err != nil {
 			return nil, err
 		}
@@ -72,6 +72,7 @@ func dbInitialization() {
 	createTableQuery := `
 		CREATE TABLE IF NOT EXISTS builds (
 			id INTEGER PRIMARY KEY AUTOINCREMENT,
+			jobName CHAR(100),
 			executionTime INTEGER,
 			startTime DATETIME 
 				DEFAULT CURRENT_TIMESTAMP,
@@ -81,12 +82,6 @@ func dbInitialization() {
 					'INPROGRESS', 'INQUEUE', 
 					'ABORTED', 'FAILED',
 					'SUCCESS'
-					)
-				),
-			jobName CHAR(10) 
-				DEFAULT 'DEFAULT' 
-				CHECK (jobName IN (
-					'DEFAULT', 'GENERATOR'
 					)
 				)
 		);
@@ -99,11 +94,11 @@ func dbInitialization() {
 	fmt.Println("Table 'users' created successfully")
 }
 
-func insertBuild(execTime int) (int64, error) {
+func insertBuild(jobName string, execTime int) (int64, error) {
 	db, err := _GetDBConnection()
 	// Insert data into the table
-	insertDataQuery := "INSERT INTO builds (executionTime) VALUES (?);"
-	result, err := db.Exec(insertDataQuery, execTime)
+	insertDataQuery := "INSERT INTO builds (jobName, executionTime) VALUES (?, ?);"
+	result, err := db.Exec(insertDataQuery, jobName, execTime)
 	if err != nil {
 		return 0, err
 	}
@@ -139,10 +134,10 @@ func getBuildByBuildNumber(buildNumber string) (Build, error) {
 
 	err = row.Scan(
 		&build.ID,
+		&build.JobName,
 		&build.ExecutionTime,
 		&build.StartTime,
 		&build.BuildStatus,
-		&build.JobName,
 	)
 
 	if err != nil {
@@ -168,7 +163,7 @@ func getAllInQueueBuilds() ([]Build, error) {
 
 	for rows.Next() {
 		var build Build
-		err := rows.Scan(&build.ID, &build.ExecutionTime, &build.StartTime, &build.BuildStatus, &build.JobName)
+		err := rows.Scan(&build.ID, &build.JobName, &build.ExecutionTime, &build.StartTime, &build.BuildStatus)
 		if err != nil {
 			return nil, err
 		}

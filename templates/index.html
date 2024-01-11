@@ -13,10 +13,10 @@
     <thead>
         <tr>
             <th>ID</th>
+            <th>Job Name</th>
             <th>Execution Time</th>
             <th>Start Time</th>
             <th>Build Status</th>
-            <th>Job Name</th>
         </tr>
     </thead>
     <tbody id="builds-table-body">
@@ -26,17 +26,18 @@
 
 <script>
     // Fetch data from localhost:8080/builds and populate the table
-    fetch('http://localhost:8080/builds')
+    const address = window.location.host
+    fetch("http://" + address + "/builds")
         .then(response => response.json())
         .then(data => {
             const tableBody = document.getElementById('builds-table-body');
             data.forEach(entry => {
                 const row = document.createElement('tr');
                 row.innerHTML = `<td>${entry.ID}</td>
+                                 <td>${entry.JobName}</td>
                                  <td>${entry.ExecutionTime}</td>
                                  <td>${new Date(entry.StartTime).toLocaleString()}</td>
-                                 <td>${entry.BuildStatus} ${getEmojiByStatus(entry.BuildStatus)}</td>
-                                 <td>${entry.JobName}</td>`;
+                                 <td>${entry.BuildStatus} ${getEmojiByStatus(entry.BuildStatus)}</td>`;
                 tableBody.appendChild(row);
             });
         })

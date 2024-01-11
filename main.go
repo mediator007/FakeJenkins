@@ -32,7 +32,6 @@ func deleteAllBuildsHandler(c *gin.Context) {
 }
 
 func jobInfoHandler(c *gin.Context) {
-	//curl localhost:8080/job/DEFAULT/api/json
 	jobName := c.Param("jobName")
 	response, err := jobInfo(jobName)
 	if err != nil {
@@ -44,8 +43,6 @@ func jobInfoHandler(c *gin.Context) {
 }
 
 func buildInfoHandler(c *gin.Context) {
-	// curl localhost:8080/job/ANY_JOB_NAME/<BUILD-NUMBER>/api/json
-	// jobName := c.Param("jobName")
 	buildNumber := c.Param("buildNumber")
 	response, err := buildInfo(buildNumber)
 	if err != nil {
@@ -57,7 +54,6 @@ func buildInfoHandler(c *gin.Context) {
 }
 
 func queueItemHandler(c *gin.Context) {
-	// curl localhost:8080/queue/item/<queueNumber>/api/json
 	queueNumber := c.Param("queueNumber")
 	response, err := queueItem(queueNumber)
 	if err != nil {
@@ -69,9 +65,10 @@ func queueItemHandler(c *gin.Context) {
 }
 
 func buildJobHandler(c *gin.Context) {
-	// curl -X POST -i localhost:8080/job/ANY_JOB_NAME/buildWithParameters?executionTime=55
+	jobName := c.Param("jobName")
 	executionTime := c.Query("executionTime")
-	response, err := buildJob(executionTime)
+
+	response, err := buildJob(jobName, executionTime)
 	if err != nil {
 		response = "Cant build Job with execTime " + executionTime
 		c.JSON(http.StatusBadRequest, response)
@@ -86,6 +83,12 @@ func returnStatic(c *gin.Context) {
 	c.HTML(http.StatusOK, "index.html", nil)
 }
 
+func getArtifactFileHandler(c *gin.Context) {
+	response := make(map[string]interface{})
+	response["link"] = "http://google.com"
+	c.JSON(http.StatusAccepted, response)
+}
+
 func main() {
 	dbInitialization()
 	r := gin.Default()
@@ -94,17 +97,10 @@ func main() {
 	r.GET("/ping", pong)
 	r.GET("/builds", buids)
 	r.DELETE("/deleteAllBuilds", deleteAllBuildsHandler)
-
-	// r.GET("/job/:jobName/api/json", jobInfoHandler)
 	r.GET("/job/:folder/job/:jobName/api/json", jobInfoHandler)
-
-	// r.GET("job/:jobName/:buildNumber/api/json", buildInfoHandler)
 	r.GET("job/:folder/job/:jobName/:buildNumber/api/json", buildInfoHandler)
-
+	r.GET("job/:folder/job/:jobName/:buildNumber/artifact/:artifactFile", getArtifactFileHandler)
 	r.GET("queue/item/:queueNumber/api/json", queueItemHandler)
-
-	// r.POST("job/:jobName/buildWithParameters", buildJobHandler)
 	r.POST("job/:folder/job/:jobName/buildWithParameters", buildJobHandler)
-
 	r.Run()
 }
