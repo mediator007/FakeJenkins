@@ -80,7 +80,7 @@ func dbInitialization() {
 				CHECK (buildStatus IN (
 					'INPROGRESS', 'INQUEUE', 
 					'ABORTED', 'FAILED',
-					'SUCCESSFUL'
+					'SUCCESS'
 					)
 				),
 			jobName CHAR(10) 

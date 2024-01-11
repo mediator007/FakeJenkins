@@ -6,6 +6,8 @@ import (
 	"time"
 )
 
+const DefaultJobExecutionTime = "20"
+
 func allBuilds() ([]Build, error) {
 	builds, err := getAllBuilds()
 	var result []Build
@@ -23,7 +25,7 @@ func allBuilds() ([]Build, error) {
 			// Compare with the current time
 			currentTime := time.Now()
 			if currentTime.After(expectedCompletionTime) {
-				_, err = updateBuildStatus(strconv.FormatInt(build.ID, 10), "SUCCESSFUL")
+				_, err = updateBuildStatus(strconv.FormatInt(build.ID, 10), "SUCCESS")
 			}
 		}
 	}
@@ -32,6 +34,11 @@ func allBuilds() ([]Build, error) {
 }
 
 func buildJob(executionTime string) (string, error) {
+
+	if executionTime == "" {
+		executionTime = DefaultJobExecutionTime
+	}
+
 	i, err := strconv.Atoi(executionTime)
 	if err != nil {
 		// Handle the error if the conversion fails
@@ -66,13 +73,15 @@ func buildInfo(buildNumber string) (map[string]interface{}, error) {
 		// Compare with the current time
 		currentTime := time.Now()
 		if currentTime.After(expectedCompletionTime) {
-			_, err = updateBuildStatus(buildNumber, "SUCCESSFUL")
+			_, err = updateBuildStatus(buildNumber, "SUCCESS")
 		}
 	}
 
 	response["artifacts"] = []string{"artifact 1", "artifact 2"}
 	response["queuId"] = build.ID
-	response["status"] = build.BuildStatus
+	// FIXME
+	response["timestamp"] = time.Now().Unix() //ms from start
+	response["result"] = build.BuildStatus
 
 	return response, nil
 }

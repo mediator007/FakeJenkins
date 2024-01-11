@@ -94,9 +94,17 @@ func main() {
 	r.GET("/ping", pong)
 	r.GET("/builds", buids)
 	r.DELETE("/deleteAllBuilds", deleteAllBuildsHandler)
-	r.GET("/job/:jobName/api/json", jobInfoHandler)
-	r.GET("job/:jobName/:buildNumber/api/json", buildInfoHandler)
+
+	// r.GET("/job/:jobName/api/json", jobInfoHandler)
+	r.GET("/job/:folder/job/:jobName/api/json", jobInfoHandler)
+
+	// r.GET("job/:jobName/:buildNumber/api/json", buildInfoHandler)
+	r.GET("job/:folder/job/:jobName/:buildNumber/api/json", buildInfoHandler)
+
 	r.GET("queue/item/:queueNumber/api/json", queueItemHandler)
-	r.POST("job/:jobName/buildWithParameters", buildJobHandler)
+
+	// r.POST("job/:jobName/buildWithParameters", buildJobHandler)
+	r.POST("job/:folder/job/:jobName/buildWithParameters", buildJobHandler)
+
 	r.Run()
 }
