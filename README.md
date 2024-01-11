@@ -50,4 +50,10 @@ Insert instance IP adress to ```core.go/buildInfo/96:response["url"]```
 For docker compose v2  
 ```docker compose build```  
 ```docker compose up -d```  
+
+## TODO
+- stop build & cancel queue handlers !!!
+- logic for generator job !!!
+- dynamic IP to response["url"]
+- fix timestamp
   
