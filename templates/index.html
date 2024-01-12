@@ -17,6 +17,8 @@
             <th>Execution Time</th>
             <th>Start Time</th>
             <th>Build Status</th>
+            <th>ForceFail</th>
+            <th>ForceUnstable</th>
         </tr>
     </thead>
     <tbody id="builds-table-body">
@@ -37,7 +39,9 @@
                                  <td>${entry.JobName}</td>
                                  <td>${entry.ExecutionTime}</td>
                                  <td>${new Date(entry.StartTime).toLocaleString()}</td>
-                                 <td>${entry.BuildStatus} ${getEmojiByStatus(entry.BuildStatus)}</td>`;
+                                 <td>${entry.BuildStatus} ${getEmojiByStatus(entry.BuildStatus)}</td>
+                                 <td>${entry.ForceFail}</td>
+                                 <td>${entry.ForceUnstable}</td>`
                 tableBody.appendChild(row);
             });
         })
@@ -47,15 +51,19 @@
     function getEmojiByStatus(buildStatus) {
         switch (buildStatus) {
             case 'INQUEUE':
-                return '🟡'; // Yellow circle emoji for INQUEUE
+                return '⚪';
             case 'INPROGRESS':
-                return '🔵'; // Blue circle emoji for INRUNNING
+                return '🔵';
             case 'ABORTED':
-                return '🔴'; // Red circle emoji for ABORTED
+                return '⛔';
+            case 'FAILED':
+                return '🔴';
             case 'SUCCESS':
-                return '🟢'; // Green circle emoji for SUCCESS
+                return '🟢';
+            case 'UNSTABLE':
+                return '🟠';
             default:
-                return ''; // Default emoji
+                return '';
         }
     }
 </script>

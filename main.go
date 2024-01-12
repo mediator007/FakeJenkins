@@ -66,9 +66,13 @@ func queueItemHandler(c *gin.Context) {
 
 func buildJobHandler(c *gin.Context) {
 	jobName := c.Param("jobName")
-	executionTime := c.Query("executionTime")
 
-	response, err := buildJob(jobName, executionTime)
+	// Job string params
+	executionTime := c.Query("executionTime")
+	forceFail := c.Query("forceFail")
+	forceUnstable := c.Query("forceUnstable")
+
+	response, err := buildJob(jobName, executionTime, forceFail, forceUnstable)
 	if err != nil {
 		response = "Cant build Job with execTime " + executionTime
 		c.JSON(http.StatusBadRequest, response)
@@ -86,7 +90,13 @@ func returnStatic(c *gin.Context) {
 func getArtifactFileHandler(c *gin.Context) {
 	response := make(map[string]interface{})
 	response["link"] = "http://google.com"
-	c.JSON(http.StatusAccepted, response)
+	c.JSON(http.StatusOK, response)
+}
+
+func stopBuildHandler(c *gin.Context) {
+	buildNumber := c.Param("buildNumber")
+	stopBuild(buildNumber)
+	c.JSON(http.StatusAccepted, "Build stopped")
 }
 
 func main() {
@@ -102,5 +112,6 @@ func main() {
 	r.GET("job/:folder/job/:jobName/:buildNumber/artifact/:artifactFile", getArtifactFileHandler)
 	r.GET("queue/item/:queueNumber/api/json", queueItemHandler)
 	r.POST("job/:folder/job/:jobName/buildWithParameters", buildJobHandler)
+	r.POST("job/:folder/job/:jobName/:buildNumber/stop", stopBuildHandler)
 	r.Run()
 }

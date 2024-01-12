@@ -17,6 +17,8 @@ type Build struct {
 	ExecutionTime int64
 	StartTime     time.Time
 	BuildStatus   string
+	ForceFail     bool
+	ForceUnstable bool
 }
 
 // GetDBConnection returns a connection to the SQLite database.
@@ -45,7 +47,15 @@ func getAllBuilds() ([]Build, error) {
 
 	for rows.Next() {
 		var build Build
-		err := rows.Scan(&build.ID, &build.JobName, &build.ExecutionTime, &build.StartTime, &build.BuildStatus)
+		err := rows.Scan(
+			&build.ID,
+			&build.JobName,
+			&build.ExecutionTime,
+			&build.StartTime,
+			&build.BuildStatus,
+			&build.ForceFail,
+			&build.ForceUnstable,
+		)
 		if err != nil {
 			return nil, err
 		}
@@ -81,9 +91,14 @@ func dbInitialization() {
 				CHECK (buildStatus IN (
 					'INPROGRESS', 'INQUEUE', 
 					'ABORTED', 'FAILED',
-					'SUCCESS'
+					'SUCCESS', 'UNSTABLE'
 					)
-				)
+				),
+			forceFail BOOLEAN
+				DEFAULT false,
+			forceUnstable BOOLEAN
+				DEFAULT false
+
 		);
 	`
 	_, err = db.Exec(createTableQuery)
@@ -94,11 +109,11 @@ func dbInitialization() {
 	fmt.Println("Table 'users' created successfully")
 }
 
-func insertBuild(jobName string, execTime int) (int64, error) {
+func insertBuild(jobName string, execTime int, forceFail bool, forceUnstable bool) (int64, error) {
 	db, err := _GetDBConnection()
 	// Insert data into the table
-	insertDataQuery := "INSERT INTO builds (jobName, executionTime) VALUES (?, ?);"
-	result, err := db.Exec(insertDataQuery, jobName, execTime)
+	insertDataQuery := "INSERT INTO builds (jobName, executionTime, forceFail, forceUnstable) VALUES (?, ?, ?, ?);"
+	result, err := db.Exec(insertDataQuery, jobName, execTime, forceFail, forceUnstable)
 	if err != nil {
 		return 0, err
 	}
@@ -138,6 +153,8 @@ func getBuildByBuildNumber(buildNumber string) (Build, error) {
 		&build.ExecutionTime,
 		&build.StartTime,
 		&build.BuildStatus,
+		&build.ForceFail,
+		&build.ForceUnstable,
 	)
 
 	if err != nil {
@@ -163,7 +180,15 @@ func getAllInQueueBuilds() ([]Build, error) {
 
 	for rows.Next() {
 		var build Build
-		err := rows.Scan(&build.ID, &build.JobName, &build.ExecutionTime, &build.StartTime, &build.BuildStatus)
+		err := rows.Scan(
+			&build.ID,
+			&build.JobName,
+			&build.ExecutionTime,
+			&build.StartTime,
+			&build.BuildStatus,
+			&build.ForceFail,
+			&build.ForceUnstable,
+		)
 		if err != nil {
 			return nil, err
 		}

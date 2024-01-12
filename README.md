@@ -7,6 +7,11 @@ FE ```localhost:8080```
 ## Available API
 #### Create Build of DEFAULT Job:  
 ``` POST /job/folder/job/ANY_JOB_NAME/buildWithParameters?executionTime=10```  
+Possible params:  
+- executionTime[int] default 20  
+- forceFail[bool] default False  
+- forceUnstable[bool] default False  
+
 Example:  
 ```curl -X POST -i localhost:8080/job/folder/job/ANY_JOB_NAME/buildWithParameters?executionTime=10``` ->  
 ```7``` & ```headers[Location]: some/strange/url/7/```  
@@ -37,8 +42,12 @@ Example:
 ```curl -X DELETE -i localhost:8080/deleteAllBuilds``` ->  
 ```"Successful delete all"```  
 
-#### GetArtifact:
+#### Ge tArtifact:
 ```GET /job/folder/job/<jobName>/<buildNumber>/artifact/<artifactName>```
+
+#### Stop Build:
+```POST /job/folder/job/<jobName>/<buildNumber>/stop```  
+Aborting build if it INPROGRESS  
 
 ### Launching
 Insert instance IP adress to ```core.go/buildInfo/96:response["url"]```  
@@ -52,8 +61,10 @@ For docker compose v2
 ```docker compose up -d```  
 
 ## TODO
-- stop build & cancel queue handlers !!!
+- stop build (+)
+- cancel queue !!!
 - logic for generator job !!!
+- forceFail & forceUnstable params (+) 
 - dynamic IP to response["url"]
 - fix timestamp
   

@@ -12,7 +12,7 @@ type Artifact struct {
 	RelativePath string `json:"relativePath"`
 }
 
-const DefaultJobExecutionTime = "5"
+const DefaultJobExecutionTime = "20"
 
 func allBuilds() ([]Build, error) {
 	builds, err := getAllBuilds()
@@ -21,9 +21,7 @@ func allBuilds() ([]Build, error) {
 		return result, err
 	}
 	for _, build := range builds {
-		if build.BuildStatus == "INQUEUE" {
-			_, err = updateBuildStatus(strconv.FormatInt(build.ID, 10), "INPROGRESS")
-		}
+		_inqueueStatusHandler(build)
 
 		if build.BuildStatus == "INPROGRESS" {
 			// Calculate the expected completion time
@@ -39,11 +37,26 @@ func allBuilds() ([]Build, error) {
 	return builds, nil
 }
 
-func buildJob(JobName string, executionTime string) (string, error) {
-
+func _handlrParamsForBuildJob(executionTime string, forceFailParam string, forceUnstableParam string) (e string, fP bool, fU bool) {
 	if executionTime == "" {
 		executionTime = DefaultJobExecutionTime
 	}
+
+	var forceFail bool
+	if forceFailParam == "true" {
+		forceFail = true
+	}
+
+	var forceUnstable bool
+	if forceUnstableParam == "true" {
+		forceUnstable = true
+	}
+	return executionTime, forceFail, forceUnstable
+}
+
+func buildJob(JobName string, executionTime string, forceFailParam string, forceUnstableParam string) (string, error) {
+
+	executionTime, forceFail, forceUnstable := _handlrParamsForBuildJob(executionTime, forceFailParam, forceUnstableParam)
 
 	i, err := strconv.Atoi(executionTime)
 	if err != nil {
@@ -51,7 +64,7 @@ func buildJob(JobName string, executionTime string) (string, error) {
 		fmt.Println("Conversion error:", err)
 		return "", err
 	}
-	queueNumber, err := insertBuild(JobName, i)
+	queueNumber, err := insertBuild(JobName, i, forceFail, forceUnstable)
 	if err != nil {
 		// Handle the error if the conversion fails
 		fmt.Println("Insertion error:", err)
@@ -61,17 +74,29 @@ func buildJob(JobName string, executionTime string) (string, error) {
 	return q, nil
 }
 
-func buildInfo(buildNumber string) (map[string]interface{}, error) {
+func _inqueueStatusHandler(build Build) {
+	if build.BuildStatus == "INQUEUE" {
+		if build.ForceFail {
+			_, _ = updateBuildStatus(strconv.FormatInt(build.ID, 10), "FAILED")
+			return
+		}
 
+		if build.ForceUnstable {
+			_, _ = updateBuildStatus(strconv.FormatInt(build.ID, 10), "UNSTABLE")
+			return
+		}
+		_, _ = updateBuildStatus(strconv.FormatInt(build.ID, 10), "INPROGRESS")
+	}
+}
+
+func buildInfo(buildNumber string) (map[string]interface{}, error) {
 	response := make(map[string]interface{})
 	build, err := getBuildByBuildNumber(buildNumber)
 	if err != nil {
 		return response, err
 	}
 
-	if build.BuildStatus == "INQUEUE" {
-		_, err = updateBuildStatus(buildNumber, "INPROGRESS")
-	}
+	_inqueueStatusHandler(build)
 
 	if build.BuildStatus == "INPROGRESS" {
 		// Calculate the expected completion time
@@ -120,4 +145,14 @@ func jobInfo(jobName string) (map[string]interface{}, error) {
 	response["buildable"] = true
 	response["inQueue"] = inQueue
 	return response, nil
+}
+
+func stopBuild(buildNumber string) {
+	build, err := getBuildByBuildNumber(buildNumber)
+	if err != nil {
+		fmt.Println(err)
+	}
+	if build.BuildStatus == "INPROGRESS" {
+		_, _ = updateBuildStatus(buildNumber, "ABORTED")
+	}
 }
