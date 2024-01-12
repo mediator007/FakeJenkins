@@ -13,7 +13,7 @@ type Artifact struct {
 	RelativePath string `json:"relativePath"`
 }
 
-const DefaultJobExecutionTime = "5"
+const DefaultJobExecutionTime = "10"
 
 func allBuilds() ([]Build, error) {
 	builds, err := getAllBuilds()
@@ -44,12 +44,12 @@ func _handlrParamsForBuildJob(executionTime string, forceFailParam string, force
 	}
 
 	var forceFail bool
-	if forceFailParam == "true" {
+	if forceFailParam == "True" {
 		forceFail = true
 	}
 
 	var forceUnstable bool
-	if forceUnstableParam == "true" {
+	if forceUnstableParam == "True" {
 		forceUnstable = true
 	}
 	return executionTime, forceFail, forceUnstable
@@ -78,7 +78,7 @@ func buildJob(JobName string, executionTime string, forceFailParam string, force
 func _inqueueStatusHandler(build Build) {
 	if build.BuildStatus == "INQUEUE" {
 		if build.ForceFail {
-			_, _ = updateBuildStatus(strconv.FormatInt(build.ID, 10), "FAILED")
+			_, _ = updateBuildStatus(strconv.FormatInt(build.ID, 10), "FAILURE")
 			return
 		}
 
@@ -157,13 +157,6 @@ func stopBuild(buildNumber string) {
 		_, _ = updateBuildStatus(buildNumber, "ABORTED")
 	}
 }
-
-// type WavesConfig struct {
-// 	Specs []struct {
-// 		Specs  []string `json:"specs"`
-// 		Length float64  `json:"length"`
-// 	} `json:"specs"`
-// }
 
 type WavesConfig struct {
 	Specs  []string `json:"specs"`

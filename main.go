@@ -66,11 +66,10 @@ func queueItemHandler(c *gin.Context) {
 
 func buildJobHandler(c *gin.Context) {
 	jobName := c.Param("jobName")
-
-	// Job string params
-	executionTime := c.Query("executionTime")
-	forceFail := c.Query("forceFail")
-	forceUnstable := c.Query("forceUnstable")
+	queryParams := c.Request.URL.Query()
+	executionTime := queryParams.Get("executionTime")
+	forceFail := queryParams.Get("forceFail")
+	forceUnstable := queryParams.Get("forceUnstable")
 
 	response, err := buildJob(jobName, executionTime, forceFail, forceUnstable)
 	if err != nil {

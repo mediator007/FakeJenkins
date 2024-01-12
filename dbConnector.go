@@ -90,7 +90,7 @@ func dbInitialization() {
 				DEFAULT 'INQUEUE' 
 				CHECK (buildStatus IN (
 					'INPROGRESS', 'INQUEUE', 
-					'ABORTED', 'FAILED',
+					'ABORTED', 'FAILURE',
 					'SUCCESS', 'UNSTABLE'
 					)
 				),
