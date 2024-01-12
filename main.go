@@ -88,9 +88,13 @@ func returnStatic(c *gin.Context) {
 }
 
 func getArtifactFileHandler(c *gin.Context) {
-	response := make(map[string]interface{})
-	response["link"] = "http://google.com"
-	c.JSON(http.StatusOK, response)
+	jobName := c.Param("jobName")
+	jobType := checkJobType(jobName)
+	if jobType == "GENERATOR" {
+		c.JSON(http.StatusOK, getWavesConfigArtifact())
+		return
+	}
+	c.JSON(http.StatusOK, getDefaultJobArtifact())
 }
 
 func stopBuildHandler(c *gin.Context) {

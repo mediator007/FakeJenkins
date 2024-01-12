@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -12,7 +13,7 @@ type Artifact struct {
 	RelativePath string `json:"relativePath"`
 }
 
-const DefaultJobExecutionTime = "20"
+const DefaultJobExecutionTime = "5"
 
 func allBuilds() ([]Build, error) {
 	builds, err := getAllBuilds()
@@ -155,4 +156,52 @@ func stopBuild(buildNumber string) {
 	if build.BuildStatus == "INPROGRESS" {
 		_, _ = updateBuildStatus(buildNumber, "ABORTED")
 	}
+}
+
+// type WavesConfig struct {
+// 	Specs []struct {
+// 		Specs  []string `json:"specs"`
+// 		Length float64  `json:"length"`
+// 	} `json:"specs"`
+// }
+
+type WavesConfig struct {
+	Specs  []string `json:"specs"`
+	Length float64  `json:"length"`
+}
+
+func checkJobType(jobName string) string {
+	wavesSubstring := "waves"
+
+	lowercaseJobName := strings.ToLower(jobName)
+
+	if strings.Contains(lowercaseJobName, wavesSubstring) {
+		return "GENERATOR"
+	} else {
+		return "DEFAULT"
+	}
+}
+
+func getDefaultJobArtifact() map[string]interface{} {
+	response := make(map[string]interface{})
+	response["link"] = "http://google.com"
+	return response
+}
+
+func getWavesConfigArtifact() []WavesConfig {
+	wavesConfigs := []WavesConfig{
+		{
+			Specs:  []string{"autowaves_Yw2Ib", "autowaves_ImT7sa28O", "autowaves_4ylh2JSQg5vL"},
+			Length: 2407.673870402982,
+		},
+		{
+			Specs:  []string{"autowaves_cxmxM37Px87whMw", "autowaves_ExDZoTy8Vj76c6P"},
+			Length: 2724.4167384707857,
+		},
+		{
+			Specs:  []string{"autowaves_pVMpliAan", "autowaves_HaN9WkAbMJUW", "autowaves_LxW0zt5xpnRZ8Q"},
+			Length: 3564.0500866046277,
+		},
+	}
+	return wavesConfigs
 }
