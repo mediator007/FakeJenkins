@@ -61,10 +61,7 @@ For docker compose v2
 ```docker compose up -d```  
 
 ## TODO
-- stop build (+)
 - cancel queue !!!
-- logic for generator job !!!
-- forceFail & forceUnstable params (+) 
 - dynamic IP to response["url"]
 - fix timestamp
   
