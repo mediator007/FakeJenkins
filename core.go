@@ -109,10 +109,26 @@ func buildInfo(buildNumber string) (map[string]interface{}, error) {
 		}
 	}
 
-	artifact := Artifact{
-		DisplayPath:  build.JobName + "_artifacts.json",
-		FileName:     build.JobName + "_artifacts.json",
-		RelativePath: build.JobName + "_artifacts.json",
+	var artifact Artifact
+	jobType := checkJobType(build.JobName)
+	if jobType == "GENERATOR" {
+		artifact = Artifact{
+			DisplayPath:  "Component_Tests_Waves_Generator_artifacts.json",
+			FileName:     "Component_Tests_Waves_Generator_artifacts.json",
+			RelativePath: "Component_Tests_Waves_Generator_artifacts.json",
+		}
+	} else if jobType == "WAVE" {
+		artifact = Artifact{
+			DisplayPath:  "Cluster_Component_Tests_artifacts.json",
+			FileName:     "Cluster_Component_Tests_artifacts.json",
+			RelativePath: "Cluster_Component_Tests_artifacts.json", //build.JobName + "_artifact.json"
+		}
+	} else {
+		artifact = Artifact{
+			DisplayPath:  "artifact.json",
+			FileName:     "artifact.json",
+			RelativePath: "artifact.json", //build.JobName + "_artifact.json"
+		}
 	}
 
 	response["artifacts"] = []Artifact{artifact}
@@ -164,12 +180,15 @@ type WavesConfig struct {
 }
 
 func checkJobType(jobName string) string {
-	wavesSubstring := "waves"
+	generatorSubstring := "waves"
+	waveSubstring := "cluster"
 
 	lowercaseJobName := strings.ToLower(jobName)
 
-	if strings.Contains(lowercaseJobName, wavesSubstring) {
+	if strings.Contains(lowercaseJobName, generatorSubstring) {
 		return "GENERATOR"
+	} else if strings.Contains(lowercaseJobName, waveSubstring) {
+		return "WAVE"
 	} else {
 		return "DEFAULT"
 	}
