@@ -62,6 +62,6 @@ For docker compose v2
 
 ## TODO
 - cancel queue !!!
-- dynamic IP to response["url"]
+- dynamic IP to response["url"] from env
 - fix timestamp
   
